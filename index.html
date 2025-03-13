@@ -1,51 +1,22 @@
 <head>
   <link rel="stylesheet" href="styles.css">
+  <script src="metarFETCH.js"></script>
+  <script src="textCenterjs"></script>
+  <script src="metarDecode.js"></script>
 </head>
 <body>
-  <h1 class="title">Ultimate EFB APP</h1>
-
-  <input type="text" id="icaoInput" placeholder="Enter ICAO Code (e.g., EGLL)">
-  <button onclick="fetchMETAR()">Get Weather</button>
-
-  <div id="metarOutput"></div>
-
-  <script>
-    async function fetchMETAR() {
-      const icaoCode = document.getElementById("icaoInput").value.trim().toUpperCase();
-      
-      if (icaoCode.length !== 4) {
-        alert("Please enter a valid 4-letter ICAO code.");
-        return;
-      }
-
-      const apiKey = "1d553c9270e944a8bfa8281e54b62355";
-      const url = `https://api.checkwx.com/metar/${icaoCode}/decoded`;
-
-      try {
-        const response = await fetch(url, {
-          headers: { "X-API-Key": apiKey }
-        });
-
-        if (!response.ok) {
-          throw new Error("Invalid ICAO code or API issue.");
-        }
-
-        const data = await response.json();
-        if (data && data.data && data.data.length > 0) {
-          const metar = data.data[0];
-          document.getElementById("metarOutput").innerHTML = `
-            <h2>Weather Data for ${icaoCode}</h2>
-            <p><strong>Temperature:</strong> ${metar.temperature.celsius}&#176;C</p>
-            <p><strong>Wind:</strong> ${metar.wind.speed_kts} knots at ${metar.wind.degrees}&#176;</p>
-            <p><strong>Visibility:</strong> ${metar.visibility.miles} miles</p>
-            <p><strong>Conditions:</strong> ${metar.flight_category}</p>
-          `;
-        } else {
-          document.getElementById("metarOutput").innerHTML = "<p>No METAR data available.</p>";
-        }
-      } catch (error) {
-        document.getElementById("metarOutput").innerHTML = `<p>Error fetching METAR data: ${error.message}</p>`;
-      }
-    }
-  </script>
+  <h1 class="title">Metar Fetcher/Decoder</h1>
+  
+  <div id="metarGrabber">
+    <h3 id="metarTitle">Fetch Metar</h3>
+    <input type="text" id="icaoInput" placeholder="ICAO" oninput="adjustTextAlignment()">
+    <button id="getMetar" onclick="fetchMETAR()">Get METAR</button>
+    <div id="metarOutput"></div>
+    <button id="decodeMetar" onclick="decodeAndDisplayMetar()">Decode</button>
+  </div>
+  <br>
+  <div id="metarDecoded">
+    <h3 id="decodeMetarTitle">Decoded Metar</h3>
+    <div id="decodedMetar"></div>
+  </div>
 </body>
