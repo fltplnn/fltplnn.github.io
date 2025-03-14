@@ -6,7 +6,7 @@ async function fetchMETAR() {
     return;
   }
 
-  const url = `https://your-project-name.vercel.app/api/fetchMETAR?icao=${icaoCode}`;
+  const url = `https://your-vercel-project-name.vercel.app/api/fetchMETAR?icao=${icaoCode}`;
 
   try {
     const response = await fetch(url);
@@ -18,8 +18,11 @@ async function fetchMETAR() {
     const data = await response.json();
 
     if (data && data.data && data.data.length > 0) {
+      const metarText = data.data[0]; // This is the METAR data
+
+      // Display only the METAR data, without the ICAO code
       document.getElementById("metarOutput").innerHTML = `
-        <p>${data.data[0]}</p>
+        <pre>${metarText}</pre>
       `;
     } else {
       document.getElementById("metarOutput").innerHTML = "<p>No METAR data available.</p>";
