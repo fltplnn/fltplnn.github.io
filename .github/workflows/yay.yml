@@ -1,12 +1,1 @@
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
 
-      - name: Set up .env file
-        run: echo "API_KEY=${{ secrets.API_KEY }}" >> .env
-
-      - name: Deploy to server
-        run: your-deployment-script-here
