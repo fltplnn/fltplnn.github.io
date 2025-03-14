@@ -15,6 +15,7 @@ background: linear-gradient(125deg, #d6d6d6 0%, #b0b0b0 54%);
   border-radius: 25px;
   height: 100px;
   position: relative;
+  grid-area: main;
 }
 
 #metarDecoded {
@@ -24,8 +25,29 @@ background: linear-gradient(125deg, #d6d6d6 0%, #b0b0b0 54%);
   border-style: solid;
   border-radius: 25px;
   height: 500pxpx;
+  grid-area: footer;
 }
 
+.grid-container {
+  display: grid;
+  grid-template-areas:
+  'header header header'
+  'main main main'
+  'footer footer footer';
+}
+
+@media only screen and (max-width: 600px) {
+  .title {
+    grid-area: 1 / span 3;
+  }
+  #metarGrabber {
+    grid-area: 2 / 1 / span 1 / span 3;
+  }
+  #metarDecoded {
+    grid-area: 3 / 1 / span 1 / span 3;
+  }
+}
+  
 #getMetar {
   display: block;
   margin: 0 auto;
@@ -64,6 +86,7 @@ background: linear-gradient(125deg, #d6d6d6 0%, #b0b0b0 54%);
   text-align: center;
   position: relative;
   bottom: 80px;
+  grid-area: header;
 }
 
 #decodeMetar {
