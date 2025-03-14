@@ -6,18 +6,21 @@ async function fetchMETAR() {
     return;
   }
 
-  const url = `https://fltplnn-github-io.vercel.app/api/fetchMETAR?icao=${icaoCode}`;
+  const url = `https://your-project-name.vercel.app/api/fetchMETAR?icao=${icaoCode}`;
 
   try {
     const response = await fetch(url);
-    
+
     if (!response.ok) {
-      throw new Error("Invalid ICAO code or API issue.");
+      throw new Error(`HTTP Error! Status: ${response.status}`);
     }
 
     const data = await response.json();
+
     if (data && data.data && data.data.length > 0) {
-      document.getElementById("metarOutput").innerHTML = `<p>${data.data[0]}</p>`;
+      document.getElementById("metarOutput").innerHTML = `
+        <p>${data.data[0]}</p>
+      `;
     } else {
       document.getElementById("metarOutput").innerHTML = "<p>No METAR data available.</p>";
     }
