@@ -32,3 +32,13 @@ async function fetchMETAR() {
       document.getElementById("metarOutput").innerHTML = `<p>Error fetching METAR data: ${error.message}</p>`;
     }
   }
+
+
+// public/index.js
+async function getData() {
+  const response = await fetch('/api/fetchData'); // This makes a request to your serverless function
+  const data = await response.json();
+  console.log(data); // Handle the response data
+}
+
+getData(); // Call the function when the page loads or based on a specific event
