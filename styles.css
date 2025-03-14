@@ -4,6 +4,11 @@
   font-family: Times New Roman;
 }
 
+
+* {
+  box-sizing: border-box;
+}
+
 body {
   background: linear-gradient(125deg, #d6d6d6 0%, #b0b0b0 54%);
 }
@@ -27,6 +32,43 @@ body {
   height: 500px;
 }
 
+
+.grid-container {
+  display: grid;
+  grid-template-areas:
+  'header header header'
+  'main main main'
+  'footer footer footer';
+}
+
+@media only screen and (max-width: 600px) {
+  .title {
+    grid-area: 1 / span 3;
+  }
+  #metarGrabber {
+    grid-area: 2 / 1 / span 1 / span 3;
+    width: 100%;
+  }
+  #metarDecoded {
+    grid-area: 3 / 1 / span 1 / span 3;
+    width: 100%;
+  }
+}
+
+@media only screen and (min-width: 600px) {
+  .title {
+    grid-area: 1 / span 3;
+  }
+  #metarGrabber {
+    grid-area: 2 / 2 / span 1 / span 1;
+    width: 100%;
+  }
+  #metarDecoded {
+    grid-area: 3 / 2 / span 1 / span 1;
+    width: 100%;
+  }
+}
+  
 #getMetar {
   display: block;
   margin: 0 auto;
@@ -86,9 +128,6 @@ body {
 
 #decodeMetarTitle {
   text-align: center;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
   top: 325px;
 }
 
