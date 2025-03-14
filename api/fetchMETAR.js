@@ -1,11 +1,14 @@
 export default async function handler(req, res) {
-  const { icao } = req.query; // Get ICAO code from query params
+  res.setHeader("Access-Control-Allow-Origin", "*"); // Allow all origins
+  res.setHeader("Access-Control-Allow-Methods", "GET");
+
+  const { icao } = req.query;
 
   if (!icao || icao.length !== 4) {
     return res.status(400).json({ error: "Invalid ICAO code" });
   }
 
-  const apiKey = process.env.API_KEY; // Securely retrieve API key from Vercel
+  const apiKey = process.env.API_KEY;
   const url = `https://api.checkwx.com/metar/${icao}`;
 
   try {
