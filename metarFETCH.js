@@ -6,7 +6,7 @@ async function fetchMETAR() {
     return;
   }
 
-  const url = `https://fltplnn-github.io.vercel.app/api/fetchMETAR?icao=${icaoCode}`;
+  const url = `https://fltplnn-github-io.vercel.app/api/fetchMETAR?icao=${icaoCode}`;
 
   try {
     const response = await fetch(url);
