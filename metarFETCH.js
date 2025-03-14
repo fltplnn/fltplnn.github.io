@@ -8,7 +8,7 @@ async function fetchMETAR() {
       return;
     }
 
-    const apiKey = process.env.API_KEY;
+    const apiKey = process.env.MY_API_KEY;
     const url = `https://api.checkwx.com/metar/${icaoCode}`;
 
     try {
@@ -33,12 +33,3 @@ async function fetchMETAR() {
     }
   }
 
-
-// public/index.js
-async function getData() {
-  const response = await fetch('/api/fetchData'); // This makes a request to your serverless function
-  const data = await response.json();
-  console.log(data); // Handle the response data
-}
-
-getData(); // Call the function when the page loads or based on a specific event
