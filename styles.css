@@ -100,3 +100,7 @@ background: linear-gradient(125deg, #d6d6d6 0%, #b0b0b0 54%);
   top: 325px;
   font-family: Big Shoulders
 }
+
+#decodedMetar {
+  text-align: center;
+}
