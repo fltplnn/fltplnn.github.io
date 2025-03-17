@@ -1,6 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders:opsz,wght@10..72,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders:opsz,wght@10..72,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+
 .title {
   text-align: center;
-  font-family: Times New Roman;
+  font-family: Big Shoulders
 }
 
 body {
@@ -15,6 +18,7 @@ background: linear-gradient(125deg, #d6d6d6 0%, #b0b0b0 54%);
   border-radius: 25px;
   height: 100px;
   position: relative;
+  background-color: white;
 }
 
 #metarDecoded {
@@ -23,7 +27,8 @@ background: linear-gradient(125deg, #d6d6d6 0%, #b0b0b0 54%);
   padding: 70px;
   border-style: solid;
   border-radius: 25px;
-  height: 500pxpx;
+  height: 500px;
+  background-color: white;
 }
 
 #getMetar {
@@ -35,6 +40,7 @@ background: linear-gradient(125deg, #d6d6d6 0%, #b0b0b0 54%);
   background-color: white;
   transition-duration: 0.3s;
   border-radius: 5px;
+  font-family: Playfair Display;
 }
 
 #getMetar:hover {
@@ -58,12 +64,14 @@ background: linear-gradient(125deg, #d6d6d6 0%, #b0b0b0 54%);
   text-align: center;
   position: relative;
   bottom: 60px;
+  font-size: 17px;
 }
 
 #metarTitle {
   text-align: center;
   position: relative;
   bottom: 80px;
+  font-family: Big Shoulders;
 }
 
 #decodeMetar {
@@ -77,6 +85,7 @@ background: linear-gradient(125deg, #d6d6d6 0%, #b0b0b0 54%);
   background-color: white;
   transition-duration: 0.3s;
   border-radius: 5px;
+  font-family: Playfair Display;
 }
 
 #decodeMetar:hover {
@@ -88,5 +97,6 @@ background: linear-gradient(125deg, #d6d6d6 0%, #b0b0b0 54%);
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  top: 335px;
+  top: 325px;
+  font-family: Big Shoulders
 }
