@@ -10,8 +10,8 @@ function decodeMetar() {
     const regex = {
         station: /^([A-Z]{4})/,
         time: /\d{6}Z/,
-        wind: /(VRB|\d{3})(\d{2})(G?\d{2,3})?(KT|MPS|KMH|KTS)/,
-        visibility: /\s(\d{4}|(\d+SM))\s/,
+        wind: /(\d{3})(\d{2})(G?\d{2,3})?(KT|MPS|KMH|KTS|VRB)/,
+        visibility: /\b((\d{4})|(\d+\s?\d?\/?\d?SM))\b/,
         variableWind: /(\d{3})V(\d{3})/,
         weather: /(RE|GR|GS|SN|RA|FZ|BR|HZ|FG|TS)/,
         clouds: /(BKN|SCT|OVC|CLR|FEW)(\d{3})/g,
@@ -20,46 +20,38 @@ function decodeMetar() {
     };
 
     const stationMatch = metar.match(regex.station);
-    const station = stationMatch ? stationMatch[1] : null;
+    const station = stationMatch ? stationMatch[1] : 'Unknown';
 
     const timeMatch = metar.match(regex.time);
-    const time = timeMatch ? timeMatch[0] : null;
+    const time = timeMatch ? timeMatch[0] : 'Unknown';
 
     const windMatch = metar.match(regex.wind);
     const wind = windMatch ? {
         direction: windMatch[1] === 'VRB' ? 'Variable' : windMatch[1] + '&deg;',
         speed: windMatch[2] + ' knots',
-        gust: windMatch[3] ? windMatch[3] + ' knots' : null
-    } : null;
+        gust: windMatch[3] ? windMatch[3] + ' knots' : 'No gusts'
+    } : { direction: 'Unknown', speed: 'Unknown', gust: 'No gusts' };
 
     const visibilityMatch = metar.match(regex.visibility);
     let visibility = null;
     if (visibilityMatch) {
-        let visValue = visibilityMatch[1];
-        if (visValue.includes('SM')) {
-            visibility = visValue;
-        } else {
-            let visMeters = parseInt(visValue);
-            if (visMeters >= 1609) {
-                visibility = (visMeters / 1609).toFixed(1) + "SM";
-            } else {
-                visibility = visMeters + " meters";
-            }
-        }
+      visibility = visibilityMatch[1];
+      } else {
+        visibility = 'Unknown';
     }
 
     const variableWindMatch = metar.match(regex.variableWind);
-    const windVariation = variableWindMatch ? `${variableWindMatch[1]}&deg; to ${variableWindMatch[2]}&deg;` : null;
+    const windVariation = variableWindMatch ? `${variableWindMatch[1]}&deg; to ${variableWindMatch[2]}&deg;` : 'No variable wind reported';
 
     const weatherMatch = metar.match(regex.weather);
-    const weather = weatherMatch ? weatherMatch[0] : null;
+    const weather = weatherMatch ? weatherMatch[0] : 'Clear';
 
-    const cloudsMatch = [...metar.matchAll(regex.clouds)];
-    let clouds = null;
-    if (cloudsMatch.length > 0) {
+    const cloudsMatch = metar.match(regex.clouds);
+    let clouds = 'No clouds';
+    if (cloudsMatch) {
         clouds = cloudsMatch.map(layer => {
-            const type = layer[1];
-            const height = parseInt(layer[2]) * 100;
+            const type = layer.substring(0, 3);
+            const height = parseInt(layer.substring(3)) * 100;
             let cloudType = '';
             switch (type) {
                 case 'BKN': cloudType = `Broken ${height}ft`; break;
@@ -73,38 +65,63 @@ function decodeMetar() {
     }
 
     const tempMatch = metar.match(regex.temperature);
-    const formatTemperature = (temp) => temp.startsWith('M') ? '-' + temp.slice(1) : temp;
 
-    const temperature = tempMatch ? formatTemperature(tempMatch[1]) + '&deg;C' : null;
-    const dewPoint = tempMatch ? formatTemperature(tempMatch[2]) + '&deg;C' : null;
+    const formatTemperature = (temp) => {
+        if (temp[0] === 'M') {
+            return '-' + temp.slice(1);
+        }
+        return temp;
+    };
+
+    const temperature = tempMatch ? formatTemperature(tempMatch[1]) + '&deg;C' : 'Unknown';
+    const dewPoint = tempMatch ? formatTemperature(tempMatch[2]) + '&deg;C' : 'Unknown';
 
     const altimeterMatch = metar.match(regex.altimeter);
-    let altimeter = null;
+    let altimeter = 'Unknown';
     if (altimeterMatch) {
         const type = altimeterMatch[1];
         const value = altimeterMatch[2];
-        altimeter = type === 'Q' ? value + ' hPa' : (parseInt(value)) + ' inHg';
+        if (type === 'Q') {
+            altimeter = value + ' hPa';
+        } else if (type === 'A') {
+            const inHg = (parseInt(value))
+            altimeter = `${inHg} inHg`;
+        }
     }
 
-    return { station, time, wind, windVariation, visibility, weather, clouds, temperature, dewPoint, altimeter };
+    return {
+        station,
+        time,
+        wind,
+        windVariation,
+        visibility,
+        weather,
+        clouds,
+        temperature,
+        dewPoint,
+        altimeter
+    };
 }
 
 function decodeAndDisplayMetar() {
     const decodedMetar = decodeMetar();
-    if (!decodedMetar) return;
 
-    let decodedMetarHtml = '';
+    if (!decodedMetar) {
+        return;
+    }
 
-    if (decodedMetar.station) decodedMetarHtml += `<p><strong>Station:</strong> ${decodedMetar.station}</p>`;
-    if (decodedMetar.time) decodedMetarHtml += `<p><strong>Time of Observation:</strong> ${decodedMetar.time}</p>`;
-    if (decodedMetar.wind) decodedMetarHtml += `<p><strong>Wind:</strong> ${decodedMetar.wind.direction} at ${decodedMetar.wind.speed}${decodedMetar.wind.gust ? ` (Gusts: ${decodedMetar.wind.gust})` : ''}</p>`;
-    if (decodedMetar.windVariation) decodedMetarHtml += `<p><strong>Wind Variation:</strong> ${decodedMetar.windVariation}</p>`;
-    if (decodedMetar.visibility) decodedMetarHtml += `<p><strong>Visibility:</strong> ${decodedMetar.visibility}</p>`;
-    if (decodedMetar.weather) decodedMetarHtml += `<p><strong>Weather:</strong> ${decodedMetar.weather}</p>`;
-    if (decodedMetar.clouds) decodedMetarHtml += `<p><strong>Clouds:</strong> ${decodedMetar.clouds}</p>`;
-    if (decodedMetar.temperature) decodedMetarHtml += `<p><strong>Temperature:</strong> ${decodedMetar.temperature}</p>`;
-    if (decodedMetar.dewPoint) decodedMetarHtml += `<p><strong>Dew Point:</strong> ${decodedMetar.dewPoint}</p>`;
-    if (decodedMetar.altimeter) decodedMetarHtml += `<p><strong>Altimeter:</strong> ${decodedMetar.altimeter}</p>`;
+    const decodedMetarHtml = `
+        <p><strong>Station:</strong> ${decodedMetar.station}</p>
+        <p><strong>Time of Observation:</strong> ${decodedMetar.time}</p>
+        <p><strong>Wind:</strong> ${decodedMetar.wind.direction} at ${decodedMetar.wind.speed} (${decodedMetar.wind.gust})</p>
+        <p><strong>Wind Variation:</strong> ${decodedMetar.windVariation}</p>
+        <p><strong>Visibility:</strong> ${decodedMetar.visibility}</p>
+        <p><strong>Weather:</strong> ${decodedMetar.weather}</p>
+        <p><strong>Clouds:</strong> ${decodedMetar.clouds}</p>
+        <p><strong>Temperature:</strong> ${decodedMetar.temperature}</p>
+        <p><strong>Dew Point:</strong> ${decodedMetar.dewPoint}</p>
+        <p><strong>Altimeter:</strong> ${decodedMetar.altimeter}</p>
+    `;
 
     document.getElementById('decodedMetar').innerHTML = decodedMetarHtml;
 }
