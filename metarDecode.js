@@ -10,7 +10,7 @@ function decodeMetar() {
     const regex = {
         station: /^([A-Z]{4})/,
         time: /\d{6}Z/,
-        wind: /(\d{3})?(VRB)(\d{2})(G?\d{2,3})?(KT|MPS|KMH|KTS)/,
+        wind: /\b(?<full>(?<direction>\d{3}|VRB)(?<speed>\d{2})(?<gust>G\d{2,3})?(?<units>KT|MPS|KMH|KTS))\b/,
         visibility: /\b((\d{4})|(\d+\s?\d?\/?\d?SM))\b/,
         variableWind: /(\d{3})V(\d{3})/,
         weather: /(RE|GR|GS|SN|RA|FZ|BR|HZ|FG|TS)/,
@@ -26,20 +26,27 @@ function decodeMetar() {
     const time = timeMatch ? timeMatch[0] : 'Unknown';
 
     const windMatch = metar.match(regex.wind);
-    const wind = windMatch ? {
-        direction: windMatch[2] === 'VRB' ? 'Variable' : windMatch[1] + '&deg;',
-        speed: windMatch[3] + ' knots',
-        gust: windMatch[4] ? windMatch[3] + ' knots' : 'No gusts'
-    } : { direction: 'Unknown', speed: 'Unknown', gust: 'No gusts' };
+    let wind = {
+        direction: 'Unknown',
+        speed: 'Unknown',
+        gust: 'No gusts',
+        units: '',
+        raw: 'Unknown'
+    };
+
+    if (windMatch && windMatch.groups) {
+        const { direction, speed, gust, units, full } = windMatch.groups;
+        wind = {
+            direction: direction === 'VRB' ? 'Variable' : direction + '&deg;',
+            speed: parseInt(speed, 10) + ' ' + units,
+            gust: gust ? parseInt(gust.slice(1), 10) + ' ' + units : 'No gusts',
+            units,
+            raw: full
+        };
+    }
 
     const visibilityMatch = metar.match(regex.visibility);
-    let visibility = null;
-
-    if (visibilityMatch) {
-      visibility = visibilityMatch[1]; // Full match, either 9999 or 1SM, 3SM, etc.
-      } else {
-        visibility = 'Unknown';
-    }
+    const visibility = visibilityMatch ? visibilityMatch[1] : 'Unknown';
 
     const variableWindMatch = metar.match(regex.variableWind);
     const windVariation = variableWindMatch ? `${variableWindMatch[1]}&deg; to ${variableWindMatch[2]}&deg;` : 'No variable wind reported';
@@ -85,8 +92,7 @@ function decodeMetar() {
         if (type === 'Q') {
             altimeter = value + ' hPa';
         } else if (type === 'A') {
-            const inHg = (parseInt(value))
-            altimeter = `${inHg} inHg`;
+            altimeter = parseInt(value) / 100 + ' inHg';
         }
     }
 
@@ -103,6 +109,7 @@ function decodeMetar() {
         altimeter
     };
 }
+
 
 function decodeAndDisplayMetar() {
     const decodedMetar = decodeMetar();
