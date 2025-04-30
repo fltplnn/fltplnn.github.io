@@ -10,7 +10,7 @@ function decodeMetar() {
     const regex = {
         station: /^([A-Z]{4})/,
         time: /\d{6}Z/,
-        wind: /(\d{3})(\d{2})(G?\d{2,3})?(KT|MPS|KMH|KTS|VRB)/,
+        wind: /(\d{3})?(VRB)(\d{2})(G?\d{2,3})?(KT|MPS|KMH|KTS)/,
         visibility: /\b((\d{4})|(\d+\s?\d?\/?\d?SM))\b/,
         variableWind: /(\d{3})V(\d{3})/,
         weather: /(RE|GR|GS|SN|RA|FZ|BR|HZ|FG|TS)/,
@@ -27,15 +27,16 @@ function decodeMetar() {
 
     const windMatch = metar.match(regex.wind);
     const wind = windMatch ? {
-        direction: windMatch[1] === 'VRB' ? 'Variable' : windMatch[1] + '&deg;',
-        speed: windMatch[2] + ' knots',
-        gust: windMatch[3] ? windMatch[3] + ' knots' : 'No gusts'
+        direction: windMatch[2] === 'VRB' ? 'Variable' : windMatch[1] + '&deg;',
+        speed: windMatch[3] + ' knots',
+        gust: windMatch[4] ? windMatch[3] + ' knots' : 'No gusts'
     } : { direction: 'Unknown', speed: 'Unknown', gust: 'No gusts' };
 
     const visibilityMatch = metar.match(regex.visibility);
     let visibility = null;
+
     if (visibilityMatch) {
-      visibility = visibilityMatch[1];
+      visibility = visibilityMatch[1]; // Full match, either 9999 or 1SM, 3SM, etc.
       } else {
         visibility = 'Unknown';
     }
