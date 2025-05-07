@@ -4,17 +4,17 @@ function decodeMetar() {
 
     if (!metar) {
         alert("No METAR data available to decode.");
-        return null; // Return null explicitly
+        return null;
     }
 
     const regex = {
         station: /^([A-Z]{4})/,
-        date: /(\d{2})/, // Fixed regex to capture the date
+        date: /(\d{2})/,
         time: /(\d{4}Z)/,
         wind: /\b(?<full>(?<direction>\d{3}|VRB)(?<speed>\d{2})(?<gust>G\d{2,3})?(?<units>KT|MPS|KMH|KTS))\b/,
         visibility: /\b((\d{4})|(\d+\s?\d?\/?\d?SM))\b/,
         variableWind: /(\d{3})V(\d{3})/,
-        weather: /(CLR|B|BC|BL|BR|DR|DS|DU|DZ|E|FC|FG|FU|FZ|GR|GS|HZ|IC|MI|PL|PO|PR|PY|RA|SA|SG|SH|SN|SQ|SS|TS|UP|VA|VC)/,
+        weather: /(?:\s|^)([+-]?(?:TS|SH|FZ|BL|DR|MI|BC|PR)?(?:RA|DZ|SN|SG|IC|PL|GR|GS|UP|BR|FG|FU|VA|DU|SA|HZ|PY|PO|SQ|FC|SS|DS))(?=\s|$)/g,
         clouds: /(BKN|SCT|OVC|CLR|FEW)(\d{3})/g,
         temperature: /([M]?\d{2})\/([M]?\d{2})/,
         altimeter: /(Q|A)(\d{4})/
@@ -23,7 +23,7 @@ function decodeMetar() {
     const stationMatch = metar.match(regex.station);
     const station = stationMatch ? stationMatch[1] : 'Unknown';
     
-    const dateMatch = metar.match(regex.date); // Fixed to use regex.date
+    const dateMatch = metar.match(regex.date);
     let date = null;
     
     if (dateMatch) {
@@ -33,7 +33,7 @@ function decodeMetar() {
                        (day === '03' || day === '23') ? 'rd' : 'th';
         date = day + suffix;
     } else {
-        date = 'Unknown'; // Provide a default value if no match
+        date = 'Unknown';
     }
 
     const timeMatch = metar.match(regex.time);
@@ -65,16 +65,86 @@ function decodeMetar() {
     const variableWindMatch = metar.match(regex.variableWind);
     const windVariation = variableWindMatch ? `${variableWindMatch[1]}&deg; to ${variableWindMatch[2]}&deg;` : 'No variable wind reported';
 
-    const weatherMatch = metar.match(regex.weather);
-    let weather = 'No weather detected';
-    
-    if (weatherMatch && weatherMatch[0]) {
-        switch (weatherMatch[0]) {
-            case 'CLR': weather = 'Clear'; break;
-            case 'RA': weather = 'Rain'; break;
-            // Add more cases as needed
+const descriptors = {
+    SH: "Showers",
+    TS: "Thunderstorms",
+    FZ: "Freezing",
+    BL: "Blowing",
+    DR: "Low Drifting",
+    MI: "Shallow",
+    BC: "Patches",
+    PR: "Partial",
+};
+
+const phenomena = {
+    RA: "Rain",
+    DZ: "Drizzle",
+    SN: "Snow",
+    SG: "Snow Grains",
+    IC: "Ice Crystals",
+    PL: "Ice Pellets",
+    GR: "Hail",
+    GS: "Small Hail",
+    UP: "Unknown Precipitation",
+    BR: "Mist",
+    FG: "Fog",
+    FU: "Smoke",
+    VA: "Volcanic Ash",
+    DU: "Dust",
+    SA: "Sand",
+    HZ: "Haze",
+    PY: "Spray",
+    PO: "Dust/Sand Whirls",
+    SQ: "Squalls",
+    FC: "Funnel Cloud",
+    SS: "Sandstorm",
+    DS: "Duststorm",
+};
+
+const weatherMatches = metar.match(regex.weather)
+
+let weather = "No weather reported";
+
+if (weatherMatches && weatherMatches.length > 0) {
+    const descriptions = [];
+
+    for (let raw of weatherMatches) {
+        let code = raw.trim();
+        let intensity = "";
+
+        if (code.startsWith("-")) {
+            intensity = "Light ";
+            code = code.slice(1);
+        } else if (code.startsWith("+")) {
+            intensity = "Heavy ";
+            code = code.slice(1);
         }
+
+        let desc = "";
+        let phen = "";
+
+        let descriptorMatch = false;
+        for (let d of Object.keys(descriptors).sort((a, b) => b.length - a.length)) {
+            if (code.startsWith(d)) {
+                desc = descriptors[d];
+                phen = phenomena[code.slice(d.length)] || code.slice(d.length);
+                descriptorMatch = true;
+                break;
+            }
+        }
+
+        if (!descriptorMatch) {
+            phen = phenomena[code] || code;
+        }
+
+        const final = `${intensity}${desc ? desc + " with " : ""}${phen}`;
+        descriptions.push(final);
     }
+
+    weather = descriptions.join(", ");
+}
+
+
 
     const cloudsMatch = metar.match(regex.clouds);
     let clouds = 'No clouds detected';
